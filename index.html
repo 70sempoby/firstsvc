@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>통진고 구글 계정 조회</title>
-  <!-- CSS는 다음 단계에서 연결 -->
+  <title>통진고 2026년 구글 계정 조회</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="container">
     <header class="header">
-      <h1>구글 계정 조회</h1>
+      <h1>통진고 2026년 구글 계정 조회</h1>
       <p class="desc">학번과 이름을 입력하면 학생용 구글 계정(이메일)을 확인할 수 있습니다.</p>
     </header>
 
@@ -62,22 +61,6 @@
           <button id="copyEmailBtn" type="button" class="tiny">복사</button>
         </div>
 
-        <div class="row">
-          <span class="label">비밀번호</span>
-          <span class="value muted">
-            보안을 위해 비밀번호는 표시하지 않습니다.
-          </span>
-        </div>
-
-        <div class="row">
-          <span class="label">비밀번호 재설정</span>
-          <span class="value">
-            <a id="resetLink" href="#" target="_blank" rel="noopener noreferrer">
-              재설정 안내 보기
-            </a>
-          </span>
-        </div>
-
         <div id="message" class="message" role="status"></div>
       </div>
     </section>
@@ -87,7 +70,10 @@
     </footer>
   </main>
 
-  <!-- JS는 다음 단계에서 연결 -->
+  <!-- Inko 먼저 -->
+  <script src="https://cdn.jsdelivr.net/npm/inko@1.1.1/inko.min.js"></script>
+  <!-- 그 다음 내 스크립트 -->
   <script src="app.js"></script>
+
 </body>
 </html>
