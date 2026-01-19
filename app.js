@@ -1,9 +1,7 @@
 // app.js
+console.log("✅ app.js loaded");
+
 document.addEventListener("DOMContentLoaded", () => {
-  // ====== (중요) 예시 데이터 ======
-  // 실제 운영에서는 여기에 "실제 계정 데이터"를 그대로 넣지 마세요.
-  // 지금은 동작 확인용 샘플입니다.
-  // 운영은 서버에서 권한 검증 후 "이메일만" 내려주는 구조를 권장합니다.
   const STUDENTS = [
     { studentId: "1101", studentName: "홍길동", email: "1101hong@school.example" },
     { studentId: "1102", studentName: "김하늘", email: "1102sky@school.example" },
@@ -23,13 +21,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetLink = document.getElementById("resetLink");
   const messageEl = document.getElementById("message");
 
+  // ====== 필수 요소 체크 (id 불일치면 여기서 잡힘) ======
+  const required = {
+    lookupForm: form,
+    studentId: studentIdEl,
+    studentName: studentNameEl,
+    resultEmpty,
+    resultBox,
+    accountEmail,
+    copyEmailBtn,
+    resetBtn,
+    resetLink,
+    message: messageEl,
+  };
+
+  const missing = Object.entries(required)
+    .filter(([, el]) => !el)
+    .map(([k]) => k);
+
+  if (missing.length) {
+    console.error("❌ HTML에서 아래 id를 찾지 못했습니다:", missing);
+    alert("HTML id가 일치하지 않아 검색이 동작하지 않습니다.\n콘솔(Console)을 확인하세요.");
+    return;
+  }
+
   // ====== 유틸 ======
   const normalizeId = (v) => String(v ?? "").trim();
   const normalizeName = (v) =>
-    String(v ?? "")
-      .trim()
-      .replace(/\s+/g, "") // 이름 사이 공백 제거
-      .toLowerCase();
+    String(v ?? "").trim().replace(/\s+/g, "").toLowerCase();
 
   function showResult() {
     resultEmpty.hidden = true;
@@ -49,12 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function copyToClipboard(text) {
-    // 최신 브라우저
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return;
     }
-    // fallback
     const ta = document.createElement("textarea");
     ta.value = text;
     ta.style.position = "fixed";
@@ -67,7 +84,73 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.removeChild(ta);
   }
 
-  // ====== 검색 로직 ======
   function findStudent(id, name) {
     const nid = normalizeId(id);
     const nname = normalizeName(name);
+
+    return STUDENTS.find(
+      (s) => normalizeId(s.studentId) === nid && normalizeName(s.studentName) === nname
+    );
+  }
+
+  // ====== 이벤트 ======
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const id = studentIdEl.value;
+    const name = studentNameEl.value;
+
+    console.log("🔎 submit:", { id, name });
+
+    if (!normalizeId(id) || !normalizeName(name)) {
+      showResult(); // 메시지 보이게
+      accountEmail.textContent = "-";
+      setMessage("학번과 이름을 모두 입력해 주세요.", "err");
+      return;
+    }
+
+    const student = findStudent(id, name);
+
+    if (!student) {
+      showResult(); // 메시지 보이게
+      accountEmail.textContent = "-";
+      setMessage("일치하는 정보가 없습니다. 학번/이름을 다시 확인해 주세요.", "err");
+      return;
+    }
+
+    showResult();
+    accountEmail.textContent = student.email;
+    setMessage("계정(ID)을 확인했습니다. 필요하면 복사 버튼을 누르세요.", "ok");
+
+    resetLink.href =
+      "reset.html?studentId=" +
+      encodeURIComponent(normalizeId(id)) +
+      "&name=" +
+      encodeURIComponent(name);
+  });
+
+  copyEmailBtn.addEventListener("click", async () => {
+    const email = accountEmail.textContent?.trim();
+    if (!email || email === "-") return;
+
+    try {
+      await copyToClipboard(email);
+      setMessage("계정(ID)을 클립보드에 복사했습니다.", "ok");
+    } catch {
+      setMessage("복사에 실패했습니다. 브라우저 권한을 확인해 주세요.", "err");
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    studentIdEl.value = "";
+    studentNameEl.value = "";
+    accountEmail.textContent = "-";
+    resetLink.href = "#";
+    showEmpty();
+    setMessage("");
+    studentIdEl.focus();
+  });
+
+  showEmpty();
+  setMessage("");
+});
